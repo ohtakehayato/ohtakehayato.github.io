@@ -152,11 +152,12 @@
       </div>
     </div>
     <script>
-      var DASH_PLAYERS = ["DASH.js", "Shaka Player"];
-      var HLS_PLAYERS = ["HLS.js", "Shaka Player", "VideoJS"];
+      var DASH_PLAYERS = ["Shaka Player"];
+      var HLS_PLAYERS = ["HLS.js"];
 
       $("#start").click(function () {
-        var protocol = $("#protocol").val();
+        // var protocol = $("#protocol").val();
+        var protocol = "HLS";
         var streamName = $("#streamName").val();
 
         // Step 1: Configure SDK Clients
@@ -189,125 +190,70 @@
             var consoleInfo = "Fetching " + protocol + " Streaming Session URL";
             console.log(consoleInfo);
 
-            if (protocol === "DASH") {
-              kinesisVideoArchivedContent.getDASHStreamingSessionURL(
-                {
-                  StreamName: streamName,
-                  PlaybackMode: $("#playbackMode").val(),
-                  DASHFragmentSelector: {
-                    FragmentSelectorType: $("#fragmentSelectorType").val(),
-                    TimestampRange:
-                      $("#playbackMode").val() === "LIVE"
-                        ? undefined
-                        : {
-                            StartTimestamp: new Date($("#startTimestamp").val()),
-                            EndTimestamp: new Date($("#endTimestamp").val()),
-                          },
-                  },
-                  DisplayFragmentTimestamp: $("#displayFragmentTimestamp").val(),
-                  DisplayFragmentNumber: $("#displayFragmentNumber").val(),
-                  MaxManifestFragmentResults: parseInt($("#maxResults").val()),
-                  Expires: parseInt($("#expires").val()),
+            kinesisVideoArchivedContent.getHLSStreamingSessionURL(
+              {
+                StreamName: streamName,
+                PlaybackMode: $("#playbackMode").val(),
+                HLSFragmentSelector: {
+                  FragmentSelectorType: $("#fragmentSelectorType").val(),
+                  TimestampRange:
+                    $("#playbackMode").val() === "LIVE"
+                      ? undefined
+                      : {
+                          StartTimestamp: new Date($("#startTimestamp").val()),
+                          EndTimestamp: new Date($("#endTimestamp").val()),
+                        },
                 },
-                function (err, response) {
-                  if (err) {
-                    return console.error(err);
-                  }
-                  console.log("DASH Streaming Session URL: " + response.DASHStreamingSessionURL);
-
-                  // Step 4: Give the URL to the video player.
-                  var playerName = $("#player").val();
-
-                  if (playerName === "Shaka Player") {
-                    var playerElement = $("#shaka");
-                    playerElement.show();
-
-                    var player = new shaka.Player(playerElement[0]);
-                    console.log("Created Shaka Player");
-
-                    player.load(response.DASHStreamingSessionURL).then(function () {
-                      console.log("Starting playback");
-                    });
-                    console.log("Set player source");
-                  } else if (playerName === "DASH.js") {
-                    var playerElement = $("#dashjs");
-                    playerElement.show();
-
-                    var player = dashjs.MediaPlayer().create();
-                    console.log("Created DASH.js Player");
-
-                    player.initialize(document.querySelector("#dashjs"), response.DASHStreamingSessionURL, true);
-                    console.log("Starting playback");
-                    console.log("Set player source");
-                  }
+                ContainerFormat: $("#containerFormat").val(),
+                DiscontinuityMode: $("#discontinuityMode").val(),
+                DisplayFragmentTimestamp: $("#displayFragmentTimestamp").val(),
+                MaxMediaPlaylistFragmentResults: parseInt($("#maxResults").val()),
+                Expires: parseInt($("#expires").val()),
+              },
+              function (err, response) {
+                if (err) {
+                  return console.error(err);
                 }
-              );
-            } else {
-              kinesisVideoArchivedContent.getHLSStreamingSessionURL(
-                {
-                  StreamName: streamName,
-                  PlaybackMode: $("#playbackMode").val(),
-                  HLSFragmentSelector: {
-                    FragmentSelectorType: $("#fragmentSelectorType").val(),
-                    TimestampRange:
-                      $("#playbackMode").val() === "LIVE"
-                        ? undefined
-                        : {
-                            StartTimestamp: new Date($("#startTimestamp").val()),
-                            EndTimestamp: new Date($("#endTimestamp").val()),
-                          },
-                  },
-                  ContainerFormat: $("#containerFormat").val(),
-                  DiscontinuityMode: $("#discontinuityMode").val(),
-                  DisplayFragmentTimestamp: $("#displayFragmentTimestamp").val(),
-                  MaxMediaPlaylistFragmentResults: parseInt($("#maxResults").val()),
-                  Expires: parseInt($("#expires").val()),
-                },
-                function (err, response) {
-                  if (err) {
-                    return console.error(err);
-                  }
-                  console.log("HLS Streaming Session URL: " + response.HLSStreamingSessionURL);
+                console.log("HLS Streaming Session URL: " + response.HLSStreamingSessionURL);
 
-                  // Step 4: Give the URL to the video player.
-                  var playerName = $("#player").val();
-                  if (playerName == "HLS.js") {
-                    var playerElement = $("#hlsjs");
-                    playerElement.show();
-                    var player = new Hls();
-                    console.log("Created HLS.js Player");
-                    player.loadSource(response.HLSStreamingSessionURL);
-                    player.attachMedia(playerElement[0]);
-                    console.log("Set player source");
-                    player.on(Hls.Events.MANIFEST_PARSED, function () {
-                      video.play();
-                      console.log("Starting playback");
-                    });
-                  } else if (playerName === "VideoJS") {
-                    var playerElement = $("#videojs");
-                    playerElement.show();
-                    var player = videojs("videojs");
-                    console.log("Created VideoJS Player");
-                    player.src({
-                      src: response.HLSStreamingSessionURL,
-                      type: "application/x-mpegURL",
-                    });
-                    console.log("Set player source");
-                    player.play();
+                // Step 4: Give the URL to the video player.
+                var playerName = $("#player").val();
+                if (playerName == "HLS.js") {
+                  var playerElement = $("#hlsjs");
+                  playerElement.show();
+                  var player = new Hls();
+                  console.log("Created HLS.js Player");
+                  player.loadSource(response.HLSStreamingSessionURL);
+                  player.attachMedia(playerElement[0]);
+                  console.log("Set player source");
+                  player.on(Hls.Events.MANIFEST_PARSED, function () {
+                    video.play();
                     console.log("Starting playback");
-                  } else if (playerName === "Shaka Player") {
-                    var playerElement = $("#shaka");
-                    playerElement.show();
-                    var player = new shaka.Player(playerElement[0]);
-                    console.log("Created Shaka Player");
-                    player.load(response.HLSStreamingSessionURL).then(function () {
-                      console.log("Starting playback");
-                    });
-                    console.log("Set player source");
-                  }
+                  });
+                } else if (playerName === "VideoJS") {
+                  var playerElement = $("#videojs");
+                  playerElement.show();
+                  var player = videojs("videojs");
+                  console.log("Created VideoJS Player");
+                  player.src({
+                    src: response.HLSStreamingSessionURL,
+                    type: "application/x-mpegURL",
+                  });
+                  console.log("Set player source");
+                  player.play();
+                  console.log("Starting playback");
+                } else if (playerName === "Shaka Player") {
+                  var playerElement = $("#shaka");
+                  playerElement.show();
+                  var player = new shaka.Player(playerElement[0]);
+                  console.log("Created Shaka Player");
+                  player.load(response.HLSStreamingSessionURL).then(function () {
+                    console.log("Starting playback");
+                  });
+                  console.log("Set player source");
                 }
-              );
-            }
+              }
+            );
           }
         );
 
