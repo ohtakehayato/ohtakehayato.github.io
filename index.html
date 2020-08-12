@@ -34,86 +34,12 @@
         <div class="row">
           <div class="col-md-4">
             <div class="form-group">
-              <label>Streaming Protocol</label>
-              <select id="protocol" class="form-control form-control-sm">
-                <option>HLS</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Player</label>
-              <select id="player" class="form-control form-control-sm"> </select>
-            </div>
-            <div class="form-group">
               <label>AWS Access Key</label>
               <input id="accessKeyId" type="password" class="form-control form-control-sm" />
             </div>
             <div class="form-group">
               <label>AWS Secret Key</label>
               <input id="secretAccessKey" type="password" class="form-control form-control-sm" />
-            </div>
-            <div class="form-group">
-              <label>Stream name</label>
-              <input id="streamName" type="text" class="form-control form-control-sm" />
-            </div>
-            <div class="form-group">
-              <label>Playback Mode</label>
-              <select id="playbackMode" class="form-control form-control-sm">
-                <option selected>LIVE</option>
-                <option>LIVE_REPLAY</option>
-                <option>ON_DEMAND</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Start Timestamp</label>
-              <input id="startTimestamp" type="datetime-local" class="form-control form-control-sm" />
-            </div>
-            <div class="form-group">
-              <label>End Timestamp</label>
-              <input id="endTimestamp" type="datetime-local" class="form-control form-control-sm" />
-            </div>
-            <div class="form-group">
-              <label>Fragment Selector Type</label>
-              <select id="fragmentSelectorType" class="form-control form-control-sm">
-                <option selected>SERVER_TIMESTAMP</option>
-                <option>PRODUCER_TIMESTAMP</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Container Format</label>
-              <select id="containerFormat" class="form-control form-control-sm">
-                <option selected="">FRAGMENTED_MP4</option>
-                <option>MPEG_TS</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Discontinuity Mode</label>
-              <select id="discontinuityMode" class="form-control form-control-sm">
-                <option selected>ALWAYS</option>
-                <option>NEVER</option>
-                <option>ON_DISCONTINUITY</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Display Fragment Timestamp</label>
-              <select id="displayFragmentTimestamp" class="form-control form-control-sm">
-                <option>ALWAYS</option>
-                <option selected>NEVER</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Display Fragment Number</label>
-              <select id="displayFragmentNumber" class="form-control form-control-sm">
-                <option>ALWAYS</option>
-                <option selected>NEVER</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Max Manifest/Playlist Fragment Results</label>
-              <input id="maxResults" type="text" class="form-control form-control-sm" />
-            </div>
-            <div class="form-group">
-              <label>Expires (seconds)</label>
-              <input id="expires" type="text" class="form-control form-control-sm" />
             </div>
             <button id="start" type="submit" class="btn btn-primary">Start Playback</button>
           </div>
@@ -157,7 +83,8 @@
       $("#start").click(function () {
         // var protocol = $("#protocol").val();
         var protocol = "HLS";
-        var streamName = $("#streamName").val();
+        // var streamName = $("#streamName").val();
+        var streamName = "baby-demo-1";
 
         // Step 1: Configure SDK Clients
         var options = {
@@ -192,20 +119,25 @@
             kinesisVideoArchivedContent.getHLSStreamingSessionURL(
               {
                 StreamName: streamName,
-                PlaybackMode: $("#playbackMode").val(),
+                // PlaybackMode: $("#playbackMode").val(),
+                PlaybackMode: "LIVE",
                 HLSFragmentSelector: {
-                  FragmentSelectorType: $("#fragmentSelectorType").val(),
+                  // FragmentSelectorType: $("#fragmentSelectorType").val(),
+                  FragmentSelectorType: "SERVER_TIMESTAMP",
                   TimestampRange:
-                    $("#playbackMode").val() === "LIVE"
+                    "LIVE" === "LIVE"
                       ? undefined
                       : {
                           StartTimestamp: new Date($("#startTimestamp").val()),
                           EndTimestamp: new Date($("#endTimestamp").val()),
                         },
                 },
-                ContainerFormat: $("#containerFormat").val(),
-                DiscontinuityMode: $("#discontinuityMode").val(),
-                DisplayFragmentTimestamp: $("#displayFragmentTimestamp").val(),
+                // ContainerFormat: $("#containerFormat").val(),
+                ContainerFormat: "FRAGMENTED_MP4",
+                // DiscontinuityMode: $("#discontinuityMode").val(),
+                DiscontinuityMode: "ALWAYS",
+                // DisplayFragmentTimestamp: $("#displayFragmentTimestamp").val(),
+                DisplayFragmentTimestamp: "NEVER",
                 MaxMediaPlaylistFragmentResults: parseInt($("#maxResults").val()),
                 Expires: parseInt($("#expires").val()),
               },
@@ -216,7 +148,8 @@
                 console.log("HLS Streaming Session URL: " + response.HLSStreamingSessionURL);
 
                 // Step 4: Give the URL to the video player.
-                var playerName = $("#player").val();
+                // var playerName = $("#player").val();
+                var playerName = "HLS.js";
                 if (playerName == "HLS.js") {
                   var playerElement = $("#hlsjs");
                   playerElement.show();
